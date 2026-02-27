@@ -62,23 +62,47 @@
     .post-body { font-size: 18px; color: #4A5568; margin-top: 20px; }
 
     /* Headings in Post */
-    .post-body h2 { color: $(main.color); margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid $(main.color); font-size: 24px; }
-    .post-body h3 { color: #2D3748; margin: 30px 0 15px; font-size: 20px; font-weight: 700; }
+    .post-body h2 { color: $(main.color); margin: 40px 0 20px; padding-bottom: 10px; border-bottom: 2px solid $(main.color); font-size: 24px; scroll-margin-top: 80px; }
+    .post-body h3 { color: #2D3748; margin: 30px 0 15px; font-size: 20px; font-weight: 700; scroll-margin-top: 80px; }
 
-    /* Table of Contents (Simplified) */
+    /* Table of Contents (Accordion) */
     #possil-toc {
         background: #F8FAFC;
         border: 1px solid #E2E8F0;
         border-radius: 12px;
-        padding: 25px;
         margin: 30px 0;
+        overflow: hidden;
     }
-    #possil-toc .toc-title { font-weight: 800; color: $(main.color); margin-bottom: 15px; display: block; font-size: 18px; }
-    #possil-toc ul { list-style: none; padding: 0; margin: 0; }
-    #possil-toc li { margin-bottom: 8px; }
-    #possil-toc li a { color: #4A5568; text-decoration: none; transition: 0.2s; font-size: 16px; }
-    #possil-toc li a:hover { color: $(main.color); text-decoration: underline; }
-    #possil-toc li.toc-h3 { padding-left: 20px; font-size: 0.95em; }
+    .toc-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        padding: 15px 20px; 
+        cursor: pointer; 
+        background: #F1F5F9;
+        transition: 0.2s;
+    }
+    .toc-header:hover { background: #E2E8F0; }
+    .toc-title { font-weight: 800; color: $(main.color); font-size: 16px; }
+    .toc-toggle-icon { 
+        font-size: 12px; 
+        transition: transform 0.3s; 
+        color: #64748B;
+    }
+    #possil-toc.active .toc-toggle-icon { transform: rotate(180deg); }
+    
+    #possil-toc ul { 
+        list-style: none; 
+        padding: 0 20px 20px; 
+        margin: 0; 
+        display: none; /* 기본 접힘 */
+    }
+    #possil-toc.active ul { display: block; }
+
+    #possil-toc li { margin-top: 10px; }
+    #possil-toc li a { color: #4A5568; text-decoration: none; transition: 0.2s; font-size: 15px; display: block; }
+    #possil-toc li a:hover { color: $(main.color); padding-left: 5px; }
+    #possil-toc li.toc-h3 { padding-left: 15px; font-size: 0.9em; border-left: 2px solid #E2E8F0; margin-left: 5px; }
 
     /* Protection Elements */
     #possil-credit { color: #A0AEC0; font-size: 13px; margin-top: 20px; }
@@ -172,7 +196,13 @@
                     if (headings.length > 0) {
                         const tocContainer = document.createElement('div');
                         tocContainer.id = 'possil-toc';
-                        let tocHtml = '<span class="toc-title">목차</span><ul>';
+                        // 활성화 상태(열림/닫힘)를 위한 클래스 토글 로직 포함
+                        let tocHtml = `
+                            <div class="toc-header" onclick="this.parentElement.classList.toggle('active')">
+                                <span class="toc-title">목차</span>
+                                <span class="toc-toggle-icon">▼</span>
+                            </div>
+                            <ul>`;
                         headings.forEach((heading) => {
                             const id = heading.id || 'toc-' + Math.random().toString(36).substr(2, 7);
                             heading.id = id;
@@ -182,10 +212,12 @@
                         tocHtml += '</ul>';
                         tocContainer.innerHTML = tocHtml;
                         postBody.insertBefore(tocContainer, postBody.firstChild);
+                        
+                        // 기본적으로 열어두고 싶다면 아래 주석 해제 또는 클래스 추가
+                        // tocContainer.classList.add('active');
                     }
                 });
             }
-
             // 초기화 실행
             window.addEventListener('load', function() {
                 checkTamper();
